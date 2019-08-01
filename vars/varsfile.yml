@@ -1,0 +1,35 @@
+---
+  heap_mem: "8"
+  jmx_port: "9999"
+  download_url: http://10.10.4.79/
+  packagedir: /tmp/
+  appdir: /opt/app/
+  datadir: /opt/data/
+  pkgdir: /opt/packages/
+  serverdir: /opt/servers/
+  datanodedir: /data/
+  #hadoop临时目录
+  tmpdir: hatmp
+  journalnodedir: journal
+  # hdfs分为name和data
+  hdfsdir: hdfs
+  
+  jdk: jdk1.8.0_191
+  app: hbase
+  app_pkg: hbase-2.1.5
+  plugin: apache-phoenix-5.0.0-HBase-2.0-bin
+  plugin_app: phoenix
+  hadoop_pkg: hadoop-2.7.7
+  cluster_name: haiwai-im
+  replication: 3
+  blocksize: 16m
+  zk_cluster: "10.10.4.66:2181,10.10.4.67:2181,10.10.4.68:2181" 
+  zk_cluster_endpoints: "10.10.4.66,10.10.4.67,10.10.4.68" 
+
+  hadoop_user: hadoop
+  ssh_key: "/home/{{ hadoop_user }}/.ssh/id_rsa"
+  
+  #influxdb_ins: http://172.29.202.143:8086/
+  #influxdb_user: root
+  #influxdb_pass: 123456
+  #influxdb_db: hbase 

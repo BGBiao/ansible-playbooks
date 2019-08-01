@@ -1,0 +1,44 @@
+{
+	"servers": [{
+		"port": "10102",
+		"host": "{{ hostip }}",
+		"queries": [{
+				"obj": "Hadoop:service=HBase,name=JvmMetrics",
+				"attr": ["MemNonHeapUsedM","MemNonHeapMaxM","MemHeapMaxM","MemHeapUsedM","MemMaxM","GcCountParNew","GcCountConcurrentMarkSweep","GcCount","ThreadsBlocked","ThreadsWaiting"],
+				"resultAlias": "GCInfo",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+
+				}]
+			},
+                        {
+                                "obj": "java.lang:type=OperatingSystem",
+                                "attr": ["OpenFileDescriptorCount","ProcessCpuLoad","SystemCpuLoad","TotalPhysicalMemorySize","FreePhysicalMemorySize","SystemLoadAverage"],
+                                "resultAlias": "OSInfo",
+                                "outputWriters": [{
+                                        "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+                                        "url": "{{ influxdb_ins }}",
+                                        "username": "{{ influxdb_user }}",
+                                        "password": "{{ influxdb_pass }}",
+                                        "database": "{{ influxdb_db }}"
+                                }]
+                        },
+			{
+				"obj": "Hadoop:service=HBase,name=RegionServer,sub=Regions",
+				"attr": ["numRegions"],
+				"resultAlias": "RegionsInfo",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+                                        "username": "{{ influxdb_user }}",
+                                        "password": "{{ influxdb_pass }}",
+                                        "database": "{{ influxdb_db }}"
+				}]
+			}
+		]
+	}]
+}

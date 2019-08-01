@@ -1,0 +1,100 @@
+---
+- hosts: "{{ host }}"
+  remote_user: root
+  vars:
+    hostip: "{{ ansible_default_ipv4.address }}"
+    node_name: "{{ ansible_hostname }}"
+    ipv6: "{{ ansible_all_ipv6_addresses[0].split(':')[-1] }}"
+    heap_mem: "8"
+    jmx_port: "9999"
+  vars_files:
+    - vars/varsfile.yml 
+  
+  tasks:
+  - name: "test ping"
+    ping:
+
+  - name: "disable the firewalld"
+    shell: "systemctl stop firewalld  && systemctl disable firewalld"
+
+  - name: "generate authorized key"
+    user:
+      name: "{{ hadoop_user }}"
+      comment: "hadoop run user"
+      shell: /bin/bash
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa
+
+  - name: "init the dir"
+    file:
+      path: "{{ item.dir }}"
+      state: directory
+      mode: '0775'
+    with_items:
+      - { dir: "{{ appdir }}" }
+      - { dir: "{{ datadir }}" }
+      - { dir: "{{ pkgdir }}" }
+      - { dir: "{{ serverdir }}" }
+      - { dir: "{{ datanodedir }}{{ app }}/{{ hdfsdir }}/name" }
+      - { dir: "{{ datanodedir }}{{ app }}/{{ hdfsdir }}/data" }
+      - { dir: "{{ datanodedir }}{{ app }}/{{ journalnodedir }}" }
+      - { dir: "{{ datanodedir }}{{ app }}/{{ tmpdir }}" }
+
+
+  - name: "download the {{ app }} packages"
+    get_url:
+      url: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    with_items:
+      - { src: "{{ download_url }}{{ app_pkg }}-bin.tar.gz", dest: "{{ pkgdir }}{{ app_pkg }}.tar.gz" }
+      - { src: "{{ download_url }}{{ jdk }}.tar.gz", dest: "{{ pkgdir }}{{ jdk }}.tar.gz" }
+      - { src: "{{ download_url }}{{ plugin }}.tar.gz", dest: "{{ pkgdir }}{{ plugin }}.tar.gz" }
+
+  - name: "untar the {{ app }}"
+    unarchive:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      # 如果解压本地文件必须设置从本地控制器进行解压
+      remote_src: yes
+    with_items:
+      - { src: "{{ pkgdir }}{{ app_pkg }}.tar.gz", dest: "{{ serverdir }}" }
+      - { src: "{{ pkgdir }}{{ jdk }}.tar.gz", dest: "{{ serverdir }}" }
+      - { src: "{{ pkgdir }}{{ plugin }}.tar.gz", dest: "{{ serverdir }}" }
+
+  - name: "link the {{ app }} to {{ appdir }}"
+    file:
+      src: "{{ serverdir }}{{ app_pkg }}"
+      dest: "{{ appdir }}{{ app }}"
+      state: link
+
+  # 初始化目录权限并拷贝ohoenix包
+  - name: "create the data dir"
+    shell: "mkdir -p {{ datadir }}{{ app }} && cp -rp {{ serverdir }}{{ plugin }}/phoenix-5.0.0-HBase-2.0-server.jar {{ appdir }}{{ app }}/lib/ && chown -R {{ hadoop_user }}.{{ hadoop_user }} /opt/ && chown -R {{ hadoop_user }}.{{ hadoop_user }} /data"
+
+  - name: "init the {{ app }} configuration!"
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      owner: "{{ hadoop_user }}"
+      group: "{{ hadoop_user }}"
+      #remote_src: yes
+    with_items:
+      #dest后面的引号与大括号中间一定不能有空格,还有后面引号的空格也要取消掉,不然文件会有空格
+      - { src: "templates/bash_profile.j2", dest: "/home/{{ hadoop_user }}/.bash_profile" }
+      - { src: "templates/hdfs-site.xml.j2", dest: "{{ appdir }}{{ app }}/conf/hdfs-site.xml" }
+      - { src: "templates/hbase-site.xml.j2", dest: "{{ appdir }}{{ app }}/conf/hbase-site.xml" }
+      - { src: "templates/hbase-env.sh.j2", dest: "{{ appdir }}{{ app }}/conf/hbase-env.sh" }
+      - { src: "templates/regionservers.j2", dest: "{{ appdir }}{{ app }}/conf/regionservers" }
+      - { src: "templates/backup-masters.j2", dest: "{{ appdir }}{{ app }}/conf/backup-masters" }
+  - name: "copy the {{ plugin }} to the {{ app }}"
+    get_url:
+      url: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      owner: "{{ hadoop_user }}"
+      group: "{{ hadoop_user }}"
+    with_items:
+      - { src: "{{ download_url }}phoenix-5.0.0-HBase-2.0-server.jar", dest: "{{ appdir }}{{ app }}/lib/phoenix-5.0.0-HBase-2.0-server.jar" }
+

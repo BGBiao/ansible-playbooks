@@ -1,0 +1,17 @@
+#!/bin/bash
+export JAVA_HOME={{ serverdir }}{{ jdk }}
+export HBASE_MANAGES_ZK=false
+export HBASE_OPTS="$HBASE_OPTS -XX:+UseConcMarkSweepGC"
+
+export HBASE_HEAPSIZE={{ heap_mem }}G
+
+export HBASE_JMX_BASE="-Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false"
+export HBASE_MASTER_OPTS="$HBASE_MASTER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10101"
+export HBASE_REGIONSERVER_OPTS="$HBASE_REGIONSERVER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10102"
+export HBASE_THRIFT_OPTS="$HBASE_THRIFT_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10103"
+export HBASE_ZOOKEEPER_OPTS="$HBASE_ZOOKEEPER_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10104"
+export HBASE_REST_OPTS="$HBASE_REST_OPTS $HBASE_JMX_BASE -Dcom.sun.management.jmxremote.port=10105"
+# snappy 压缩库
+export HBASE_LIBRARY_PATH=/opt/servers/hadoop-2.7.7/lib/native/
+
+
