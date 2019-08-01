@@ -1,0 +1,12 @@
+---
+  heap_mem: "8"
+  jmx_port: "9999"
+  download_url: http://10.10.4.79/
+  packagedir: /tmp/
+  appdir: /opt/app/
+  datadir: /opt/data/
+  pkgdir: /opt/packages/
+  serverdir: /opt/servers/
+  jdk: jdk1.8.0_191
+  app: zookeeper
+  app_pkg: zookeeper-3.4.14
