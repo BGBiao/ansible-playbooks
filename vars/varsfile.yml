@@ -1,0 +1,11 @@
+---
+  jmx_port: "9999"
+  download_url: http://10.10.4.79/
+  packagedir: /tmp/
+  appdir: /opt/app/
+  datadir: /opt/data/
+  pkgdir: /opt/packages/
+  serverdir: /opt/servers/
+  jdk: jdk1.8.0_191
+  zk_cluster: 10.10.4.66:2181,10.10.4.67:2181,10.10.4.68:2181
+  heap_mem: "3"

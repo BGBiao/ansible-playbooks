@@ -1,0 +1,70 @@
+---
+- hosts: "{{ host }}"
+  remote_user: root
+  vars:
+    #hostip: "{{ ansible_all_ipv4_addresses[0] }}"
+    hostip: "{{ ansible_default_ipv4.address }}"
+    node_name: "{{ ansible_hostname }}"
+    ipv6: "{{ ansible_all_ipv6_addresses[0].split(':')[-1] }}"
+    jmx_port: "9999"
+    id: "{{ broker_id }}"
+    packagedir: /tmp/
+    appdir: /opt/app/
+    datadir: /opt/data/
+    pkgdir: /opt/packages/
+    serverdir: /opt/servers/
+    app: kafka
+    app_pkg: kafka_2.11-2.2.1
+  vars_files:
+    - vars/varsfile.yml
+  tasks:
+  - name: "test ping"
+    ping:
+
+  - name: "init the dir"
+    shell: "mkdir -p {{ datadir }}{{ app }}/kafka-logs {{ appdir }} {{ datadir }} {{ pkgdir }} {{ serverdir }}"
+
+  - name: "download the {{ app }} packages"
+    get_url:
+      url: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    with_items:
+      - { src: "{{ download_url }}{{ app_pkg }}.tgz", dest: "{{ pkgdir }}{{ app_pkg }}.tar.gz" }
+      - { src: "{{ download_url }}{{ jdk }}.tar.gz", dest: "{{ pkgdir }}{{ jdk }}.tar.gz" }
+
+  - name: "untar the {{ app }}"
+    unarchive:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      # 如果解压本地文件必须设置从本地控制器进行解压
+      remote_src: yes
+    with_items:
+      - { src: "{{ pkgdir }}{{ app_pkg }}.tar.gz", dest: "{{ serverdir }}" }
+      - { src: "{{ pkgdir }}{{ jdk }}.tar.gz", dest: "{{ serverdir }}" }
+
+  - name: "link the {{ app }} to {{ appdir }}"
+    file:
+      src: "{{ serverdir }}{{ app_pkg }}"
+      dest: "{{ appdir }}{{ app }}"
+      state: link
+  - name: "create the data dir"
+    shell: "mkdir -p {{ datadir }}{{ app }}"
+  - name: "change the {{ jdk }} env"
+    lineinfile:
+      path: /etc/profile
+      regexp: '^export\ JAVA_HOME'
+      line: "export JAVA_HOME={{ serverdir }}{{ jdk }}\nexport PATH=${JAVA_HOME}/bin:${PATH}"
+
+
+  - name: "init the es configuration!"
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      owner: root
+      group: root
+    with_items:
+      #dest后面的引号与大括号中间一定不能有空格,还有后面引号的空格也要取消掉,不然文件会有空格
+      - { src: "templates/server.properties.j2", dest: "{{ appdir }}{{ app }}/config/server.properties" }
+      - { src: "templates/kafka-server-start.sh.j2", dest: "{{ appdir }}{{ app }}/bin/kafka-server-start.sh" }
+
