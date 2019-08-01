@@ -1,0 +1,34 @@
+---
+  heap_mem: "8"
+  jmx_port: "8880"
+  download_url: http://10.10.4.79/
+  packagedir: /tmp/
+  appdir: /opt/app/
+  datadir: /opt/data/
+  pkgdir: /opt/packages/
+  serverdir: /opt/servers/
+  datanodedir: /data/
+  #hadoop临时目录
+  tmpdir: hatmp
+  journalnodedir: journal
+  # hdfs分为name和data
+  hdfsdir: hdfs
+  
+  jdk: jdk1.8.0_191
+  app: hadoop
+  app_pkg: hadoop-2.7.7
+  hadoop_pkg: hadoop-2.7.7
+  cluster_name: haiwai-im
+  replication: 3
+  blocksize: 16m
+  zk_cluster: "10.10.4.66:2181,10.10.4.67:2181,10.10.4.68:2181" 
+
+  hadoop_user: hadoop
+  ssh_key: "/home/{{ hadoop_user }}/.ssh/id_rsa"
+  
+  namenode1: 10.10.4.73
+  namenode2: 10.10.4.72
+  datanode1: 10.10.4.76
+  datanode2: 10.10.4.75
+  datanode3: 10.10.4.74
+  

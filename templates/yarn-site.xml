@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<configuration>
+    <!-- 开启RM高可用 -->
+    <property>
+         <name>yarn.resourcemanager.ha.enabled</name>
+         <value>true</value>
+    </property>
+
+    <!-- 指定RM的cluster id -->
+    <property>
+         <name>yarn.resourcemanager.cluster-id</name>
+         <value>{{ cluster_name }}</value>
+    </property>
+
+    <!-- 指定RM的名字 -->
+    <property>
+         <name>yarn.resourcemanager.ha.rm-ids</name>
+         <value>rm1,rm2</value>
+    </property>
+
+    <!-- 分别指定RM的地址 -->
+    <property>
+         <name>yarn.resourcemanager.hostname.rm1</name>
+         <value>namenode1</value>
+    </property>
+    <property>
+         <name>yarn.resourcemanager.hostname.rm2</name>
+         <value>namenode2</value>
+    </property>
+
+    <!-- 指定zk集群地址 -->
+    <property>
+         <name>yarn.resourcemanager.zk-address</name>
+         <!--value>10.10.31.209:2181,10.10.31.210:2181,10.10.31.211:2181</value-->
+         <value>{{ zk_cluster }}</value>
+    </property>
+
+<!--nodemanager上的附属服务需要配置成mapreduce_shuffle才可以运行MR任务-->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+
+    <!--如上-->
+    <property>
+        <name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+        <value>org.apache.hadoop.mapred.ShuffleHandler</value>
+    </property>
+
+    <!--RM对应客户端暴露的地址,客户端通过该地址想RM提交应用程序-->
+    <property>
+      <name>yarn.resourcemanager.address</name>
+      <value>namenode1:8030</value>
+    </property>
+
+     <!--RM对管理员暴露的访问地址，管理员通过该地址向RM发送管理命令-->
+    <property>
+      <name>yarn.resourcemanager.admin.address</name>
+      <value>namenode1:8031</value>
+    </property>
+
+    <!--RM对NM暴露的地址，NM通过该地址像RM汇报心跳，领取任务等-->
+    <property>
+      <name>yarn.resourcemanager.resource-tracker.address</name>
+      <value>namenode1:8032</value>
+    </property>
+
+    <!--调度器地址，是RM像对ApplicationMaster暴露的访问地址；ApplicationMaster通过该地址向RM申请资源，释放资源-->
+    <property>
+      <name>yarn.resourcemanager.scheduler.address</name>
+      <value>namenode1:8033</value>
+    </property>
+
+     <!--RM对外的web UI地址,用户可以在浏览器中查看集群信息-->
+    <property>
+      <name>yarn.resourcemanager.webapp.address</name>
+      <value>namenode1:8088</value>
+    </property>
+
+    <!--NodeManager 总的可用物理内存，不能小于1024,整个过程不可修改-->
+    <!--设置yarn队列总共20G内存,90个逻辑cpu-->
+    <property>
+      <name>yarn.nodemanager.resource.memory-mb</name>
+      <value>202400</value>
+    </property>
+
+    <property>
+	<name>yarn.nodemanager.resource.cpu-vcores</name>
+	<value>90</value>
+    </property>
+
+
+</configuration>

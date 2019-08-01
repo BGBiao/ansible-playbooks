@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+
+<!--定义集群名称-->
+    <property>
+      <name>dfs.nameservices</name>
+      <value>{{ cluster_name }}</value>
+    </property>
+
+    <!--配置两个namenode逻辑名称-->
+    <property>
+      <name>dfs.ha.namenodes.{{ cluster_name }}</name>
+      <value>nn1,nn2</value>
+    </property>
+
+    <!--配置namenode物理节点和rpc通信端口-->
+    <property>
+      <name>dfs.namenode.rpc-address.{{ cluster_name }}.nn1</name>
+      <value>namenode1:8020</value>
+    </property>
+
+    <property>
+      <name>dfs.namenode.rpc-address.{{ cluster_name }}.nn2</name>
+      <value>namenode2:8020</value>
+    </property>
+
+    <!--配置namenode的物理节点http通信端口-->
+    <property>
+       <name>dfs.namenode.http-address.{{ cluster_name }}.nn1</name>
+       <value>namenode1:50070</value>
+    </property>
+    <property>
+       <name>dfs.namenode.http-address.{{ cluster_name }}.nn2</name>
+       <value>namenode2:50070</value>
+    </property>
+
+    <property>
+       <name>dfs.namenode.shared.edits.dir</name>
+       <value>qjournal://datanode1:8485;datanode2:8485;datanode3:8485/{{ cluster_name }}</value>
+    </property>
+    <!--配置journalnode共享的edits目录-->
+    <property>
+       <name>dfs.journalnode.edits.dir</name>
+       <value>{{ datanodedir }}{{ app }}/{{ journalnodedir }}</value>
+
+    </property>
+
+    <!--配置zkfc实现的类-->
+    <!--用来识别nameservice-->
+    <property>
+       <name>dfs.client.failover.proxy.provider.{{ cluster_name }}</name>
+       <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+    <!--配置zkfc隔离机制-->
+    <property>
+       <name>dfs.ha.fencing.methods</name>
+       <value>sshfence</value>
+    </property>
+
+    <!--配置zkfc切换对方namenode时所使用的的方式-->
+    <property>
+       <name>dfs.ha.fencing.ssh.private-key-files</name>
+       <value>{{ ssh_key }}</value>
+    </property>
+
+  <property>
+      <name>dfs.ha.fencing.ssh.connect-timeout</name>
+      <value>30000</value>
+  </property>
+
+
+    <!--配置是否自动开启zkfc切换-->
+    <property>
+       <name>dfs.ha.automatic-failover.enabled</name>
+       <value>true</value>
+    </property>
+
+    <!--ha模式下面很多参数应该可以不要了-->
+    <!--定义namenode的存放路径: 存放fsimage文件,可以按照,分割的多个文件-->
+    <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>file://{{ datanodedir }}{{ app }}/{{  hdfsdir  }}/name</value>
+        <final>true</final>
+    </property>
+
+    <!--定义datanode的存放路径: 真正存储数据块的地方[注意如果是多个目录，多个目录需要再不同磁盘;每个块在同一个机器上仅仅存储一份]-->
+    <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>file://{{ datanodedir }}{{ app }}/{{  hdfsdir  }}/data</value>
+    </property>
+
+    <!--配置副本数-->
+    <property>
+        <name>dfs.replication</name>
+        <value>{{ replication }}</value>
+    </property>
+
+    <!--配置secondary namenode地址，如果设置了HA，就不再使用这个了-->
+    <!--property>
+      <name>dfs.namenode.secondary.http-address</name>
+      <value>10.10.4.226:50090</value>
+    </property-->
+
+
+    <property>
+      <name>dfs.namenode.servicerpc-bind-host</name>
+      <value>0.0.0.0</value>
+    </property>
+
+    <!--开启webhdfs-->
+    <property>
+        <name>dfs.webhdfs.enabled</name>
+        <value>true</value>
+        <final>true</final>
+    </property>
+
+    <property>
+        <name>dfs.blocksize</name>
+        <value>{{ blocksize }}</value>
+    </property>
+
+</configuration>
+

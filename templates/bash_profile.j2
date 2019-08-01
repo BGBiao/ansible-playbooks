@@ -1,0 +1,17 @@
+# .bash_profile
+
+# Get the aliases and functions
+if [ -f ~/.bashrc ]; then
+	. ~/.bashrc
+fi
+
+# User specific environment and startup programs
+export JAVA_HOME={{ serverdir }}{{ jdk }}
+export HADOOP_HOME={{ appdir }}{{ app }}
+export HADOOP_PREFIX={{ appdir }}{{ app }}
+PATH=$PATH:$HOME/.local/bin:$HOME/bin
+export PATH=${JAVA_HOME}/bin:${PATH}
+export PATH=${HADOOP_HOME}/bin:${PATH}
+
+
+export PATH
