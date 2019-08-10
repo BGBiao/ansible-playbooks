@@ -1,0 +1,24 @@
+#[Member]
+BASE_DIR="{{ base_dir }}"
+ETCD_NAME="{{ node_name }}"
+ETCD_DATA_DIR="{{ etcd_data_dir }}"
+ETCD_LISTEN_PEER_URLS="https://{{ hostip }}:2380"
+ETCD_LISTEN_CLIENT_URLS="https://{{ hostip }}:2379"
+
+#[Clustering]
+ETCD_INITIAL_ADVERTISE_PEER_URLS="https://{{ hostip }}:2380"
+ETCD_ADVERTISE_CLIENT_URLS="https://{{ hostip }}:2379"
+# 提前规划好的节点
+ETCD_INITIAL_CLUSTER="etcd01=https://172.29.202.134:2380,etcd02=https://172.29.202.154:2380,etcd03=https://172.29.202.174:2380"
+ETCD_INITIAL_CLUSTER_TOKEN="{{ cluster_token }}"
+ETCD_INITIAL_CLUSTER_STATE="new"
+
+#[Security]
+ETCD_CERT_FILE="{{ etcd_ssl_dir }}server.pem"
+ETCD_KEY_FILE="{{ etcd_ssl_dir }}server-key.pem"
+ETCD_TRUSTED_CA_FILE="{{ etcd_ssl_dir }}ca.pem"
+ETCD_CLIENT_CERT_AUTH="true"
+ETCD_PEER_CERT_FILE="{{ etcd_ssl_dir }}server.pem"
+ETCD_PEER_KEY_FILE="{{ etcd_ssl_dir }}server-key.pem"
+ETCD_PEER_TRUSTED_CA_FILE="{{ etcd_ssl_dir }}ca.pem"
+ETCD_PEER_CLIENT_CERT_AUTH="true"

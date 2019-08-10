@@ -1,0 +1,57 @@
+---
+- hosts: "{{ host }}"
+  remote_user: root
+  vars:
+    #hostip: "{{ ansible_all_ipv4_addresses[0] }}"
+    #hostip: "{{ inventory_hostname }}"
+    hostip: "{{ ansible_default_ipv4.address }}"
+    # hosts文件中传过来的nodename
+    node_name: "{{ nodename }}"
+    ipv6: "{{ ansible_all_ipv6_addresses[0].split(':')[-1] }}"
+  vars_files:
+    - vars/varsfile.yml
+  tasks:
+  - name: "test ping"
+    ping:
+  - name: "init env"
+    shell: "mkdir -p {{ base_dir }} {{ etcd_data_dir }} {{ etcd_ssl_dir }} {{ etcd_conf_dir }} {{ server_dir }} {{ package_dir }}"
+
+
+  - name: "wget {{ etcd_version }}"
+    get_url:
+     url: "{{ item.url }}"
+     dest: "{{ item.dest }}"
+     mode: 0644
+     owner: root
+     group: root
+    with_items:
+        - { url: "{{ download_url }}{{ etcd_version }}.tar.gz" , dest: "{{ package_dir }}" }
+
+  - name: "untar the {{ etcd_version }}"
+    unarchive:
+     src: "{{ item.src }}"
+     dest: "{{ item.dest }}"
+     owner: root
+     group: root
+     remote_src: yes
+    with_items:
+      - { src: "{{ package_dir }}{{ etcd_version }}.tar.gz", dest: "{{ server_dir }}" }
+
+  - name: "copy the etcd execfile"
+    shell: "cp -rp {{ server_dir }}{{ etcd_version }}/etcd* /usr/bin/"
+
+  - name: "init the es configuration!"
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      owner: root
+      group: root
+    with_items:
+      #dest后面的引号与大括号中间一定不能有空格,还有后面引号的空格也要取消掉,不然文件会有空格
+      - { src: "templates/etcd.conf.j2", dest: "{{ etcd_conf }}" }
+      - { src: "templates/etcd.service.j2", dest: "/etc/systemd/system/etcd.service" }
+      - { src: "ssl/etcd/server.pem", dest: "{{ etcd_ssl_dir }}server.pem" }
+      - { src: "ssl/etcd/server-key.pem", dest: "{{ etcd_ssl_dir }}server-key.pem" }
+      - { src: "ssl/etcd/ca.pem", dest: "{{ etcd_ssl_dir }}ca.pem" }
+

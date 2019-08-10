@@ -1,0 +1,4 @@
+[master]
+172.29.202.134 nodename=etcd01
+172.29.202.154 nodename=etcd02
+172.29.202.174 nodename=etcd03
