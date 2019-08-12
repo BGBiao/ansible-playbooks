@@ -1,0 +1,19 @@
+---
+  user: es
+  cluster_name: "cmdb_es"
+  heap_mem: "2"
+  download_url: http://172.29.202.140/soul/hadoop/
+  packagedir: /tmp/
+  appdir: /opt/app/
+  datadir: /opt/data/
+  pkgdir: /opt/packages/
+  serverdir: /opt/servers/
+  logdir: /opt/logs/
+  jdk_pkg: jdk1.8.0_191
+
+  app: elasticsearch
+  app_pkg: elasticsearch-6.4.3
+
+  esnode1: 172.29.202.145
+  esnode2: 172.29.202.148
+  esnode3: 172.29.202.149

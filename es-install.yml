@@ -1,0 +1,73 @@
+---
+- hosts: "{{ host }}"
+  remote_user: root
+  vars:
+    hostip: "{{ ansible_default_ipv4.address }}"
+    node_name: "{{ ansible_hostname }}"
+    ipv6: "{{ ansible_all_ipv6_addresses[0].split(':')[-1] }}"
+    jmx_port: "9999"
+    # 传参:每次传单个节点
+    node_name: "{{ node_name }}"
+  vars_files:
+    - vars/varsfile.yml
+  tasks:
+  - name: "test ping"
+    ping:
+
+  - name: "init the dir"
+    shell: "mkdir -p {{ datadir }} {{ appdir }} {{ pkgdir }} {{ serverdir }} {{ logdir }} "
+
+  - name: "init the user"
+    user:
+      name: "{{ user }}"
+      comment: app process
+      force: yes
+
+
+  - name: "copy the {{ app }} packages"
+    get_url:
+      url: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      #remote_src: true
+    with_items:
+      - { src: "{{ download_url }}{{ app_pkg }}.tar.gz", dest: "{{ pkgdir }}{{ app_pkg }}.tar.gz" }
+      - { src: "{{ download_url }}{{ jdk_pkg }}.tar.gz", dest: "{{ pkgdir }}{{ jdk_pkg }}.tar.gz" }
+
+  - name: "untar the {{ app }}"
+    unarchive:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      # 如果解压本地文件必须设置从本地控制器进行解压
+      remote_src: yes
+    with_items:
+      - { src: "{{ pkgdir }}{{ app_pkg }}.tar.gz", dest: "{{ serverdir }}"}
+      - { src: "{{ pkgdir }}{{ jdk_pkg }}.tar.gz", dest: "{{ serverdir }}"}
+
+  - name: "link the {{ app }} to {{ appdir }}"
+    file:
+      src: "{{ serverdir }}{{ app_pkg }}"
+      dest: "{{ appdir }}{{ app }}"
+      state: link
+  - name: "create the data dir"
+    shell: "mkdir -p {{ datadir }}{{ app }} {{ logdir }}{{ app }} && chown -R {{ user }}.{{ user }} /opt"
+
+  - name: "init the {{ app }} configuration!"
+    tags: config
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      owner: "{{ user }}"
+      group: "{{ user }}"
+    with_items:
+      #dest后面的引号与大括号中间一定不能有空格,还有后面引号的空格也要取消掉,不然文件会有空格
+      - { src: "templates/elasticsearch.yml.j2", dest: "{{ appdir }}{{ app }}/config/elasticsearch.yml" }
+      - { src: "templates/jvm.options.j2", dest: "{{ appdir }}{{ app }}/config/jvm.options" }
+      - { src: "templates/base_profile.j2", dest: "/home/{{ user }}/.bash_profile" }
+      - { src: "templates/sysctl.conf", dest: "/etc/sysctl.conf" }
+      - { src: "templates/limits.conf.j2", dest: "/etc/security/limits.conf" }
+
+  - name: "start the {{ app }}"
+    tags: start
+    shell: "sysctl -p && export JAVA_HOME=/opt/servers/jdk1.8.0_191 && export PATH=${JAVA_HOME}/bin:${PATH} && su - {{ user }} -c 'export JAVA_HOME=/opt/servers/jdk1.8.0_191 && export PATH=${JAVA_HOME}/bin:${PATH} && /opt/app/elasticsearch/bin/elasticsearch -d'"
+
