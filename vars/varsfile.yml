@@ -14,6 +14,6 @@
   app: elasticsearch
   app_pkg: elasticsearch-6.4.3
 
-  esnode1: 172.29.202.145
-  esnode2: 172.29.202.148
-  esnode3: 172.29.202.149
+  esnode1: 172.29.202.134
+  esnode2: 172.29.202.154
+  esnode3: 172.29.202.174
