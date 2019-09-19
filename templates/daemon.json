@@ -1,0 +1,10 @@
+{
+  "exec-opts": ["native.cgroupdriver=cgroupfs"],
+  "registry-mirrors": ["http://registry.cn-hangzhou.aliyuncs.com", "http://hub-mirror.c.163.com/","http://registry.ap-northeast-1.aliyuncs.com"],
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "5"
+  }
+}
+
+

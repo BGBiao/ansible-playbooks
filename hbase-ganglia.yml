@@ -1,0 +1,46 @@
+---
+- hosts: "{{ host }}"
+  remote_user: root
+  vars:
+    hostip: "{{ ansible_default_ipv4.address }}"
+    node_name: "{{ ansible_hostname }}"
+    ipv6: "{{ ansible_all_ipv6_addresses[0].split(':')[-1] }}"
+    heap_mem: "8"
+    jmxport: "{{ jmxport }}"
+    role: "{{ role }}"
+    jmxtrans: "jmxtrans-270.rpm"
+    app: "ganglia"
+    cluster: "my-hbase-cluster"
+    gmetadip: "10.10.4.73"
+  vars_files:
+    - vars/varsfile.yml
+
+  tasks:
+  - name: "test ping"
+    ping:
+
+  - name: "disable the firewalld"
+    shell: "systemctl stop firewalld  && systemctl disable firewalld"
+
+  # 初始化目录权限并拷贝ohoenix包
+  - name: "install package for {{ app }}"
+    shell: "yum install epel-release -y && yum install   ganglia-gmond ganglia-gmetad.x86_64 -y"
+
+  - name: "init the {{ app }} configuration!"
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      #remote_src: yes
+    with_items:
+      #dest后面的引号与大括号中间一定不能有空格,还有后面引号的空格也要取消掉,不然文件会有空格
+      - { src: "templates/gmetad.conf.j2", dest: "/etc/ganglia/gmetad.conf" }
+      - { src: "templates/gmond.conf.j2", dest: "/etc/ganglia/gmond.conf" }
+      - { src: "templates/hadoop-metrics2-hbase.properties.j2", dest: "/opt/app/hbase/conf/hadoop-metrics2-hbase.properties" }
+      - { src: "templates/hadoop-metrics2.properties.j2", dest: "/opt/app/hadoop/etc/hadoop/hadoop-metrics2.properties" }
+    tags: config
+
+  - name: "restart the gmond"
+    shell: "systemctl restart gmond && systemctl enable gmond"
+
+

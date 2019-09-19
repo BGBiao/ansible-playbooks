@@ -1,0 +1,44 @@
+{
+	"servers": [{
+		"port": "{{ jmxport }}",
+		"host": "{{ hostip }}",
+		"queries": [{
+				"obj": "Hadoop:service=HBase,name=Master,sub=FileSystem",
+				"attr": ["HlogSplitTime_num_ops","MetaHlogSplitTime_num_ops","HlogSplitSize_num_ops","MetaHlogSplitSize_num_ops"],
+				"resultAlias": "hbase_master_fs",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+
+				}]
+			},
+			{
+				"obj": "Hadoop:service=HBase,name=Master,sub=Server",
+				"attr": ["mergePlanCount","splitPlanCount","masterActiveTime","masterFinishedInitializationTime","averageLoad","numRegionServers","numDeadRegionServers","clusterRequests"],
+				"resultAlias": "hbase_master_server",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+				}]
+			},
+			{
+				"obj": "Hadoop:service=HBase,name=Master,sub=IPC",
+				"attr": ["queueSize","numOpenConnections","numActiveHandler","receivedBytes","TotalCallTime_num_ops","ResponseSize_num_ops","ResponseSize_min","ResponseSize_max","ResponseSize_mean","ResponseSize_SizeRangeCount_0-10","exceptions","ProcessCallTime_num_ops","RequestSize_num_ops","RequestSize_min","RequestSize_max","RequestSize_mean","sentBytes","QueueCallTime_num_ops","QueueCallTime_TimeRangeCount_0-1"],
+				"resultAlias": "hbase_master_ipc",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+				}]
+			}
+		]
+	}]
+}

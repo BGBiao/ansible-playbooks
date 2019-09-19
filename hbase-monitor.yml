@@ -1,0 +1,49 @@
+---
+- hosts: "{{ host }}"
+  remote_user: root
+  vars:
+    hostip: "{{ ansible_default_ipv4.address }}"
+    node_name: "{{ ansible_hostname }}"
+    ipv6: "{{ ansible_all_ipv6_addresses[0].split(':')[-1] }}"
+    heap_mem: "8"
+    jmxport: "{{ jmxport }}"
+    role: "{{ role }}"
+    jmxtrans: "jmxtrans-270.rpm"
+  vars_files:
+    - vars/varsfile.yml
+
+  tasks:
+  - name: "test ping"
+    ping:
+
+  - name: "disable the firewalld"
+    shell: "systemctl stop firewalld  && systemctl disable firewalld"
+
+
+  - name: "download the {{ app }} packages"
+    get_url:
+      url: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+    with_items:
+      - { src: "{{ download_url }}{{ jmxtrans }}", dest: "{{ pkgdir }}" }
+    tags: pkg
+
+  # 初始化目录权限并拷贝ohoenix包
+  - name: "create the data dir"
+    shell: "yum localinstall {{ pkgdir }}{{ jmxtrans }} -y"
+
+  - name: "init the {{ app }} configuration!"
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+      mode: 0755
+      #remote_src: yes
+    with_items:
+      #dest后面的引号与大括号中间一定不能有空格,还有后面引号的空格也要取消掉,不然文件会有空格
+      - { src: "templates/hbase-common.json.j2", dest: "/var/lib/jmxtrans/hbase-common.json" }
+      - { src: "templates/hbase-{{ role }}.json.j2", dest: "/var/lib/jmxtrans/hbase-{{ role }}.json" }
+    tags: config
+
+  - name: "restart the jmxtrans"
+    shell: "systemctl restart jmxtrans && systemctl enable jmxtrans"
+

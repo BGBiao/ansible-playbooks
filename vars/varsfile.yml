@@ -1,0 +1,22 @@
+---
+  heap_mem: "8"
+  jmx_port: "9999"
+  download_url: http://172.29.202.140/soul/
+  packagedir: /tmp/
+  appdir: /opt/app/
+  datadir: /opt/data/
+  pkgdir: /opt/packages/
+  serverdir: /opt/servers/
+  datanodedir: /data/
+  dockerdir: /etc/docker/
+  dockertmp: /root/.docker/
+  dockerport: 5256
+
+  app: docker
+  app_pkg: docker-18.09.6
+
+#  influxdb_ins: http://influxdb:8086/
+#  influxdb_user: root
+#  influxdb_pass: 123456
+#  influxdb_db: hbase
+

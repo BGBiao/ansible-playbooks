@@ -1,0 +1,56 @@
+{
+	"servers": [{
+		"port": "{{ jmxport }}",
+		"host": "{{ hostip }}",
+		"queries": [{
+				"obj": "Hadoop:service=HBase,name=RegionServer,sub=Regions",
+				"attr": ["*"],
+				"resultAlias": "hbase_region_regions",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+
+				}]
+			},
+			{
+				"obj": "Hadoop:service=HBase,name=RegionServer,sub=Server",
+				"attr": ["regionCount","storeCount","hlogFileCount","hlogFileSize","storeFileCount","memStoreSize","storeFileSize","numReferenceFiles","averageRegionSize","storeFileIndexSize","staticIndexSize","staticBloomSize","percentFilesLocal","splitQueueLength","compactionQueueLength","flushQueueLength","blockCacheFreeSize","blockCacheCount","blockCacheSize","totalRequestCount","totalRowActionRequestCount","readRequestCount","writeRequestCount","rpcGetRequestCount","rpcScanRequestCount","rpcMultiRequestCount","rpcMutateRequestCount","blockCacheHitCount","blockCacheMissCount","flushedCellsCount","compactedCellsCount","flushedCellsSize","compactedCellsSize","majorCompactedCellsSize","mobFlushCount","blockedRequestCount","MajorCompactionTime_num_ops","compactedOutputBytes","pauseWarnThresholdExceeded","ScanTime_num_ops","ScanTime_median","Increment_num_ops","Delete_num_ops","Delete_median","Put_num_ops","Put_median","DeleteBatch_num_ops","DeleteBatch_median","splitRequestCount","CompactionInputFileCount_num_ops","CompactionInputFileCount_median","PutBatch_num_ops","PutBatch_median","CompactionTime_num_ops","CompactionTime_median","Get_num_ops","Get_median","MajorCompactionInputFileCount_num_ops","MajorCompactionInputFileCount_median","CheckAndPut_num_ops","CheckAndPut_median","SplitTime_num_ops","SplitTime_median","MajorCompactionOutputSize_num_ops","majorCompactedInputBytes","slowAppendCount","flushedOutputBytes","CompactionOutputFileCount_num_ops","slowDeleteCount","Replay_num_ops","Replay_median","FlushTime_num_ops","FlushTime_median","MajorCompactionInputSize_num_ops","MajorCompactionInputSize_median","pauseInfoThresholdExceeded","splitSuccessCount","CheckAndDelete_num_ops","CheckAndDelete_median","ScanSize_num_ops","ScanSize_median","slowGetCount","flushedMemstoreBytes","majorCompactedOutputBytes","PauseTimeWithoutGc_num_ops","PauseTimeWithoutGc_median","slowPutCount","slowIncrementCount","compactedInputBytes","Bulkload_count"],
+				"resultAlias": "hbase_region_server",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+				}]
+			},
+			{
+				"obj": "Hadoop:service=HBase,name=RegionServer,sub=Memory",
+				"attr": ["blockedFlushGauge","memStoreSize","IncreaseBlockCacheSize_num_ops","unblockedFlushGauge","IncreaseMemStoreSize_num_ops","BlockedFlushes_num_ops","blockCacheSize"],
+				"resultAlias": "hbase_region_memory",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+				}]
+			},
+                        {
+                                "obj": "Hadoop:service=HBase,name=RegionServer,sub=IPC",
+                                "attr": ["queueSize","numCallsInGeneralQueue","numOpenConnections","numActiveHandler","receivedBytes","TotalCallTime_num_ops","ResponseSize_num_ops","exceptions","exceptions.UnknownScannerException","exceptions.OutOfOrderScannerNextException","ProcessCallTime_num_ops","RequestSize_num_ops","sentBytes","QueueCallTime_num_ops",""],
+                                "resultAlias": "hbase_region_ipc",
+                                "outputWriters": [{
+                                        "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+                                        "url": "{{ influxdb_ins }}",
+                                        "username": "{{ influxdb_user }}",
+                                        "password": "{{ influxdb_pass }}",
+                                        "database": "{{ influxdb_db }}"
+                                }]
+                        }
+		]
+	}]
+}

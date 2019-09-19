@@ -1,0 +1,45 @@
+{
+	"servers": [{
+		"port": "{{ jmxport }}",
+		"host": "{{ hostip }}",
+		"queries": [{
+				"obj": "Hadoop:service=HBase,name=JvmMetrics",
+				"attr": ["MemNonHeapUsedM", "MemNonHeapMaxM", "MemHeapMaxM", "MemHeapUsedM", "MemMaxM", "GcCountParNew", "GcCountConcurrentMarkSweep", "GcCount", "ThreadsBlocked", "ThreadsWaiting"],
+				"resultAlias": "jvmmetrics",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+
+				}]
+			},
+			{
+				"obj": "java.lang:type=OperatingSystem",
+				"attr": ["MaxFileDescriptorCount","OpenFileDescriptorCount", "ProcessCpuLoad", "SystemCpuLoad", "TotalPhysicalMemorySize", "FreePhysicalMemorySize", "SystemLoadAverage"],
+				"resultAlias": "osmetrics",
+				"outputWriters": [{
+					"@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+					"url": "{{ influxdb_ins }}",
+					"username": "{{ influxdb_user }}",
+					"password": "{{ influxdb_pass }}",
+					"database": "{{ influxdb_db }}"
+				}]
+			},
+                        {
+                                "obj": "Hadoop:service=HBase,name=MetricsSystem,sub=Stats",
+                                "attr": ["NumActiveSources","NumAllSources","NumActiveSinks","PublishNumOps","PublishAvgTime","DroppedPubAll"],
+                                "resultAlias": "statsmetrics",
+                                "outputWriters": [{
+                                        "@class": "com.googlecode.jmxtrans.model.output.InfluxDbWriterFactory",
+                                        "url": "{{ influxdb_ins }}",
+                                        "username": "{{ influxdb_user }}",
+                                        "password": "{{ influxdb_pass }}",
+                                        "database": "{{ influxdb_db }}"
+                                }]
+                        }
+
+		]
+	}]
+}
